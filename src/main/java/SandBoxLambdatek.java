@@ -59,7 +59,7 @@ public class SandBoxLambdatek {
     private static int statNotOkContent = 0;
 
     private static DateTime dateTimeInit = DateTime.now();
-    private static DateTime dateTimeEnd = DateTime.now().plusHours(1);
+    private static DateTime dateTimeEnd = DateTime.now().plusMinutes(5);
     private static Timer timer = new Timer();
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
@@ -132,6 +132,9 @@ public class SandBoxLambdatek {
                     fichier.append(String.valueOf(page.getRequestHeaders()));
                     fichier.append("\nResponse headers : \n");
                     fichier.append(String.valueOf(page.getResponseHeaders()));
+                    fichier.append("\n\n\n\nContent : \n");
+                    fichier.append(String.valueOf(page.getContent()));
+                    fichier.append("\n\n\n\n");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

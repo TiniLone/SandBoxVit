@@ -46,14 +46,14 @@ public class GetConnection {
         int tryConn = 0;
         boolean hasMorePage = true;
 
-        String pageUrl = "https://www.mabeo-direct.com/truspilot/index/productavisajax/?skus=136843D%2C136845Z%2C136852Y%2C136854U%2C136851N%2C136844O%2C136855F%2C136853J%2C180423V%2C136846K%2C136847V&product=Lanières+PVC+souple+transparentes";
+        String pageUrl = "https://www.tonerpreis.de/druckerpatronen/3949914am-tinte-kodak-3949914-no-10b-schwarz.html";
         pageUrl = pageUrl.replace(" ", "%20").replace("|", "%7C");
         System.out.println(pageUrl);
 
         DefaultHttpClient httpClient = createClient();
 
         while (hasMorePage) {
-            while (status != HttpStatus.SC_OK && tryConn < 1) {
+            while (status != HttpStatus.SC_OK && tryConn < 5) {
                 ++tryConn;
                 try {
                     System.out.println("Get connect on url : " + pageUrl);
@@ -137,6 +137,7 @@ public class GetConnection {
                     }
                 } catch (Exception exc) {
                     System.out.println("Connection parse error : " + exc);
+                    status = 0;
                 }
             }
             if (status == HttpStatus.SC_OK) {

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +23,8 @@ import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.routing.HttpRoutePlanner;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
@@ -32,6 +35,10 @@ import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class GetConnection {
 
@@ -46,7 +53,7 @@ public class GetConnection {
         int tryConn = 0;
         boolean hasMorePage = true;
 
-        String pageUrl = "https://www.tonerpreis.de/druckerpatronen/3949914am-tinte-kodak-3949914-no-10b-schwarz.html";
+        String pageUrl = "https://www.tonerpreis.de/search/index";
         pageUrl = pageUrl.replace(" ", "%20").replace("|", "%7C");
         System.out.println(pageUrl);
 
@@ -240,8 +247,8 @@ public class GetConnection {
     // }
 
     private static DefaultHttpClient createClient() throws Exception {
-        // DefaultHttpClient httpclient = buildCustomHttpClient();
-        DefaultHttpClient httpclient = new DefaultHttpClient();
+         DefaultHttpClient httpclient = buildCustomHttpClient();
+//        DefaultHttpClient httpclient = new DefaultHttpClient();
         HttpHost proxyHost = new HttpHost("proxy-out.workit.fr", 3129);
 
         HttpRoutePlanner routePlanner = new HttpRoutePlanner() {
@@ -259,42 +266,42 @@ public class GetConnection {
         return httpclient;
     }
 
-    // private static DefaultHttpClient buildCustomHttpClient() throws Exception {
-    // DefaultHttpClient httpclient = new DefaultHttpClient();
-    //
-    // SSLContext sc = SSLContext.getInstance("TLSv1.2");
-    // sc.init(null, getTrustingManager(), new java.security.SecureRandom());
-    //
-    // SSLSocketFactory socketFactory = new SSLSocketFactory(sc);
-    // Scheme sch = new Scheme("https", 443, socketFactory);
-    // httpclient.getConnectionManager().getSchemeRegistry().register(sch);
-    // return httpclient;
-    // }
+    private static DefaultHttpClient buildCustomHttpClient() throws Exception {
+        DefaultHttpClient httpclient = new DefaultHttpClient();
 
-    // private static TrustManager[] getTrustingManager() {
-    // TrustManager[] trustAllCerts = new TrustManager[1];
-    // X509TrustManager trustManager = new X509TrustManager() {
-    // @Override
-    // public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-    // return null;
-    // }
-    //
-    // @Override
-    // public void checkClientTrusted(X509Certificate[] certs, String authType) {
-    // // Do nothing
-    // }
-    //
-    // @Override
-    // public void checkServerTrusted(X509Certificate[] certs, String authType) {
-    // // Do nothing
-    // }
-    //
-    // };
-    //
-    // trustAllCerts[0] = trustManager;
-    //
-    // return trustAllCerts;
-    // }
+        SSLContext sc = SSLContext.getInstance("TLSv1.2");
+        sc.init(null, getTrustingManager(), new java.security.SecureRandom());
+
+        SSLSocketFactory socketFactory = new SSLSocketFactory(sc);
+        Scheme sch = new Scheme("https", 443, socketFactory);
+        httpclient.getConnectionManager().getSchemeRegistry().register(sch);
+        return httpclient;
+    }
+
+    private static TrustManager[] getTrustingManager() {
+        TrustManager[] trustAllCerts = new TrustManager[1];
+        X509TrustManager trustManager = new X509TrustManager() {
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            @Override
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                // Do nothing
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                // Do nothing
+            }
+
+        };
+
+        trustAllCerts[0] = trustManager;
+
+        return trustAllCerts;
+    }
 
     static JsonNode getjsDocument(Element document) {
         String scriptData = getScriptData(document);

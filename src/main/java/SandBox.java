@@ -12,6 +12,8 @@ import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.routing.HttpRoutePlanner;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
@@ -23,6 +25,9 @@ import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -30,18 +35,19 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class SandBox {
 
-    private static DefaultHttpClient httpClient = createClient();
-    private static String entryPoint = "https://www.klium.nl/";//https://www.bodeboca.com
+    private static DefaultHttpClient httpClient;
+    private static String entryPoint = "https://www.tonerpreis.de/search/index";//https://www.bodeboca.com
     private static String host;
 //    private static String siteDomain;
 
     private final static String PROXY = "proxy-out.workit.fr"; //"89.42.27.22";
-    private final static int PROXY_PORT = 3150; //38953;
+    private final static int PROXY_PORT = 3129; //38953;
 
     private final static String USER = "workit";//workit
     private final static String PASSWD = "jUbunUqUG";//jUbunUqUG
@@ -53,12 +59,13 @@ public class SandBox {
     private static int stat403 = 0;
 
     private static DateTime dateTimeInit = DateTime.now();
-    private static DateTime dateTimeEnd = DateTime.now().plusMinutes(10);
+    private static DateTime dateTimeEnd = DateTime.now().plusMinutes(1);
     private static Timer timer = new Timer();
 
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
+    public static void main(String[] args) throws Exception {
         configureHostDomain();
         createClient();
+//        System.setProperty("jsse.enableSNIExtension", "false");
 
         final BufferedWriter fichier = new BufferedWriter(new FileWriter("D:\\Sandbox\\" + host + dateTimeInit.getMillis() + ".txt"));
         fichier.write("---------------Begin---------------\n");
@@ -87,16 +94,16 @@ public class SandBox {
                 }
 
                 Page page = getConnection(entryPoint, "type");
-                String content = page.getContent();
+//                String content = page.getContent();
                 int status = page.getStatus();
-                boolean isOkContent = isOk(content);
+//                boolean isOkContent = isOk(content);
 
 //                long num = this.scheduledExecutionTime() - dateTimeInit.getMillis();
 //                long den = dateTimeEnd.getMillis() - dateTimeInit.getMillis();
 //                float percent = ((float) num / (float) den) * 100;
 
 //                System.out.println("% : " + percent);
-                System.out.println("Content Ok : " + isOkContent);
+//                System.out.println("Content Ok : " + isOkContent);
 
                 try {
                     fichier.append("\n-----------------------------------\n");
@@ -105,13 +112,13 @@ public class SandBox {
                     fichier.append("\nStatus     : ");
                     fichier.append(String.valueOf(status));
                     fichier.append("\nContent Ok : ");
-                    fichier.append(String.valueOf(isOkContent));
+//                    fichier.append(String.valueOf(isOkContent));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         };
-        timer.schedule(task, 0, 10000);
+        timer.schedule(task, 0, 100);
     }
 
     private static boolean isOk(String content) {
@@ -134,8 +141,8 @@ public class SandBox {
         }
     }
 
-    private static DefaultHttpClient createClient() {
-        DefaultHttpClient httpclient = new DefaultHttpClient();
+    private static DefaultHttpClient createClient() throws Exception {
+        DefaultHttpClient httpclient = buildCustomHttpClient();
 
 //        httpclient.getCredentialsProvider().setCredentials(
 //                new AuthScope(PROXY, PROXY_PORT),
@@ -155,6 +162,43 @@ public class SandBox {
         httpclient.getParams().setParameter(ConnRouteParams.DEFAULT_PROXY, proxyHost);
         httpclient.setRoutePlanner(routePlanner);
         return httpclient;
+    }
+
+    private static DefaultHttpClient buildCustomHttpClient() throws Exception {
+        DefaultHttpClient httpclient = new DefaultHttpClient();
+
+        SSLContext sc = SSLContext.getInstance("TLSv1.2");
+        sc.init(null, getTrustingManager(), new java.security.SecureRandom());
+
+        SSLSocketFactory socketFactory = new SSLSocketFactory(sc);
+        Scheme sch = new Scheme("https", 443, socketFactory);
+        httpclient.getConnectionManager().getSchemeRegistry().register(sch);
+        return httpclient;
+    }
+
+    private static TrustManager[] getTrustingManager() {
+        TrustManager[] trustAllCerts = new TrustManager[1];
+        X509TrustManager trustManager = new X509TrustManager() {
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            @Override
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                // Do nothing
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                // Do nothing
+            }
+
+        };
+
+        trustAllCerts[0] = trustManager;
+
+        return trustAllCerts;
     }
 
     private static Page getConnection(final String url, final String type) {

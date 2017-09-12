@@ -215,7 +215,7 @@ public class LocalTest {
         return null;
     }
 
-    public static String cleanDateDE(String strDelivery) {
+    private static String cleanDateDE(String strDelivery) {
         if (strDelivery.contains("januar")) strDelivery = strDelivery.replace("januar", "01");
         if (strDelivery.contains("februar")) strDelivery = strDelivery.replace("februar", "02");
         if (strDelivery.contains("marz")) strDelivery = strDelivery.replace("marz", "03");
@@ -231,7 +231,7 @@ public class LocalTest {
         return strDelivery;
     }
 
-    static LocalDate parseDeliveryDateDE(final String deliveryDateText, String pattern) {
+    private static LocalDate parseDeliveryDateDE(final String deliveryDateText, String pattern) {
         DateTimeFormatter DELIVERY_DATE_PARSER = DateTimeFormat.forPattern(pattern).withLocale(Locale.getDefault());
         try {
             return LocalDate.parse(deliveryDateText, DELIVERY_DATE_PARSER);
@@ -241,31 +241,31 @@ public class LocalTest {
         return null;
     }
 
-    static String getNumberOnString(String text) {
+    private static String getNumberOnString(String text) {
         return text.replaceAll("[^\\d+]", "");
     }
 
-    static String deleteAccent(String strTxt) {
+    private static String deleteAccent(String strTxt) {
         String strTmpTxt = strTxt;
         strTmpTxt = Normalizer.normalize(strTmpTxt, Normalizer.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
         return strTmpTxt;
     }
 
-    static void codeAscii(String text) {
+    private static void codeAscii(String text) {
         System.out.println(text);
         for (int idx = 0; idx < text.length(); idx++) {
             System.out.println("" + text.charAt(idx) + " => " + (int) text.charAt(idx));
         }
     }
 
-    static String encode(String text) {
+    private static String encode(String text) {
         for (int iChar = 128; iChar < 192; iChar++) {
             text = text.replace("" + (char) 195 + (char) iChar, "" + (char) (iChar + 64));
         }
         return text;
     }
 
-    static String replaceCarac(String text, int carac, String replacement) {
+    private static String replaceCarac(String text, int carac, String replacement) {
         return text.replace("" + (char) carac, replacement);
     }
 }

@@ -34,6 +34,8 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class TestLocal {
@@ -44,10 +46,36 @@ public class TestLocal {
     private static String siteDomain;
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
-        configureHostDomain();
-        createClient();
-        Page newPage = getConnection(entryPoint, "type");
-        System.out.println(newPage.getContent());
+//        configureHostDomain();
+//        createClient();
+//        Page newPage = getConnection(entryPoint, "type");
+//        System.out.println(newPage.getContent());
+        String PATTERN_IP_ADRESSE_URL = "https*://[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}";
+        String url = "https://145.9.252.123/";
+        Matcher matcher = Pattern.compile(PATTERN_IP_ADRESSE_URL).matcher(url);
+        int status = 301;
+        int count = 0;
+        boolean isRedirect = (status == 301 || status == 302) && StringUtils.isNotBlank(url);
+        if (matcher.find()) {
+            System.out.println("isRedirect : " + isRedirect);
+            while (isRedirect && count < 1) {
+                System.out.println("Status : " + status);
+                System.out.println("Location : " + url);
+                if (count == 0) status = 302;
+                if (count == 1) status = 301;
+                if (count == 2) status = 302;
+                if (count == 3) status = 200;
+                if (count == 0) url = "http://185.169.233.200/";
+                if (count == 1) url = "http://185.169.233.300/";
+                if (count == 2) url = "http://185.169.233.400/";
+                if (count == 3) url = "http://185.169.233.500/";
+                count++;
+            }
+            System.out.println("Status : " + status);
+            System.out.println("Location : " + url);
+        } else if (isRedirect) {
+            System.out.println("Redirect normally");
+        }
     }
 
     private static void configureHostDomain() {

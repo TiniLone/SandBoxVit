@@ -50,7 +50,7 @@ public class TestLocal {
 //        createClient();
 //        Page newPage = getConnection(entryPoint, "type");
 //        System.out.println(newPage.getContent());
-        String PATTERN_IP_ADRESSE_URL = "https*://[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}";
+        String PATTERN_IP_ADRESSE_URL = "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}";
         String url = "https://145.9.252.123/";
         Matcher matcher = Pattern.compile(PATTERN_IP_ADRESSE_URL).matcher(url);
         int status = 301;
